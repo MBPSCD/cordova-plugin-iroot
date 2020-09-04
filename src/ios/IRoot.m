@@ -9,7 +9,7 @@
 #import "IRoot.h"
 #import <sys/stat.h>
 #import <sys/sysctl.h>
-
+#import <mach-o/dyld.h>
 
 
 #define NOTJAIL 4783242
@@ -40,6 +40,20 @@ enum {
     KFSymbolic = 34859,
     // Failed the File Exists Check
     KFFileExists = 6625,
+
+    KFNewCheckDYLD = 6626,
+
+    KFNewCheckSL = 6627,
+
+    KFNewCheckRDW = 6628,
+
+    KFNewCheckSFCO = 6629,
+
+    KFNewCheckESF = 6630,
+
+    KFNewCheckURL = 6631,
+
+    KFNewCheckFork = 6632
 } JailbrokenChecks;
 
 // Define the filesystem check
@@ -56,6 +70,14 @@ enum {
 #define CYDIAPACKAGE    @"cydia://package/com.fake.package"
 #define CYDIALOC        @"/Applications/Cydia.app"
 #define HIDDENFILES     [NSArray arrayWithObjects:@"/Applications/RockApp.app",@"/Applications/Icy.app",@"/usr/sbin/sshd",@"/usr/bin/sshd",@"/usr/libexec/sftp-server",@"/Applications/WinterBoard.app",@"/Applications/SBSettings.app",@"/Applications/MxTube.app",@"/Applications/IntelliScreen.app",@"/Library/MobileSubstrate/DynamicLibraries/Veency.plist",@"/Library/MobileSubstrate/DynamicLibraries/LiveClock.plist",@"/private/var/lib/apt",@"/private/var/stash",@"/System/Library/LaunchDaemons/com.ikey.bbot.plist",@"/System/Library/LaunchDaemons/com.saurik.Cydia.Startup.plist",@"/private/var/tmp/cydia.log",@"/private/var/lib/cydia", @"/etc/clutch.conf", @"/var/cache/clutch.plist", @"/etc/clutch_cracked.plist", @"/var/cache/clutch_cracked.plist", @"/var/lib/clutch/overdrive.dylib", @"/var/root/Documents/Cracked/", nil]
+
+
+#define URLSCHEMES          [NSArray arrayWithObjects:@"undecimus://",@"cydia://",@"sileo://",@"zbra://", nil]
+#define EXISTSUSPICIOUSFILES     [NSArray arrayWithObjects:@"/usr/sbin/frida-server",@"/etc/apt/sources.list.d/electra.list",@"/etc/apt/sources.list.d/sileo.sources",@"/.bootstrapped_electra",@"/usr/lib/libjailbreak.dylib",@"/jb/lzma",@"/.cydia_no_stash",@"/.installed_unc0ver",@"/jb/offsets.plist",@"/usr/share/jailbreak/injectme.plist",@"/etc/apt/undecimus/undecimus.list",@"/var/lib/dpkg/info/mobilesubstrate.md5sums",@"/Library/MobileSubstrate/MobileSubstrate.dylib",@"/jb/jailbreakd.plist",@"/jb/amfid_payload.dylib",@"/jb/libjailbreak.dylib",@"/usr/libexec/cydia/firmware.sh",@"/var/lib/cydia",@"/etc/apt",@"/private/var/lib/apt",@"/private/var/Users/",@"/var/log/apt",@"/Applications/Cydia.app",@"/private/var/stash",@"/private/var/lib/apt/",@"/private/var/lib/cydia",@"/private/var/cache/apt/",@"/private/var/log/syslog",@"/private/var/tmp/cydia.log",@"/Applications/Icy.app",@"/Applications/MxTube.app",@"/Applications/RockApp.app",@"/Applications/blackra1n.app",@"/Applications/SBSettings.app",@"/Applications/FakeCarrier.app",@"/Applications/WinterBoard.app",@"/Applications/IntelliScreen.app",@"/private/var/mobile/Library/SBSettings/Themes",@"/Library/MobileSubstrate/CydiaSubstrate.dylib",@"/System/Library/LaunchDaemons/com.ikey.bbot.plist",@"/Library/MobileSubstrate/DynamicLibraries/Veency.plist",@"/Library/MobileSubstrate/DynamicLibraries/LiveClock.plist",@"/System/Library/LaunchDaemons/com.saurik.Cydia.Startup.plist",@"/bin/bash",@"/usr/sbin/sshd",@"/usr/libexec/ssh-keysign",@"/bin/sh",@"/etc/ssh/sshd_config",@"/usr/libexec/sftp-server",@"/usr/bin/ssh",nil]
+#define OPENSUSPICIOUSFILES [NSArray arrayWithObjects:@"/.installed_unc0ver",@"/.bootstrapped_electra",@"/Applications/Cydia.app",@"/Library/MobileSubstrate/MobileSubstrate.dylib",@"/etc/apt",@"/var/log/apt",@"/bin/bash",@"/usr/sbin/sshd",@"/usr/bin/ssh", nil]
+#define WRITEABLEDIRS       [NSArray arrayWithObjects:@"/",@"/root/",@"/private/",@"/jb/", nil]
+#define SYMLINKS            [NSArray arrayWithObjects:@"/var/lib/undecimus/apt",@"/Applications",@"/Library/Ringtones",@"/Library/Wallpaper",@"/usr/arm-apple-darwin9",@"/usr/include",@"/usr/libexec",@"/usr/share", nil]
+#define DYLDS               [NSArray arrayWithObjects:@"SubstrateLoader.dylib",@"SSLKillSwitch2.dylib",@"SSLKillSwitch.dylib",@"MobileSubstrate.dylib",@"TweakInject.dylib",@"CydiaSubstrate",@"cynject",@"CustomWidgetIcons",@"PreferenceLoader",@"RocketBootstrap",@"WeeLoader",@"/.file", nil]
 
 /* End Jailbreak Definitions */
 
@@ -136,29 +158,28 @@ enum {
 
         (f = fopen("/bin/bash", "r")) ||
         (f = fopen("/bin/sh", "r")) ||
+        (f = fopen("/usr/sbin/sshd", "r")) ||
         (f = fopen("/usr/libexec/ssh-keysign", "r")) ||
+        (f = fopen("/usr/sbin/sshd", "r")) ||
+
         (f = fopen("/usr/bin/sshd", "r")) ||
         (f = fopen("/usr/libexec/sftp-server", "r")) ||
-
         (f = fopen("/etc/ssh/sshd_config", "r")) ||
         (f = fopen("/etc/apt", "r")) ||
         (f = fopen("/Applications/Cydia.app", "r")) ||
+
+
         (f = fopen("/Applications/RockApp.app", "r")) ||
         (f = fopen("/Applications/Icy.app", "r")) ||
-
         (f = fopen("/Applications/WinterBoard.app", "r")) ||
         (f = fopen("/Applications/SBSettings.app", "r")) ||
         (f = fopen("/Applications/MxTube.app", "r")) ||
+
         (f = fopen("/Applications/IntelliScreen.app", "r")) ||
         (f = fopen("/Applications/FakeCarrier.app", "r")) ||
-
         (f = fopen("/Applications/blackra1n.app", "r")) ||
         (f = fopen("/Applications/IntelliScreen.app", "r")) ||
-        (f = fopen("/Applications/FakeCarrier.app", "r")) ||
-        (f = fopen("/usr/bin/frida-server", "r")) ||
-        (f = fopen("/usr/local/bin/cycript", "r")) ||
-
-        (f = fopen("/usr/lib/libcycript.dylib", "r"))
+        (f = fopen("/Applications/FakeCarrier.app", "r"))
         )  {
         fclose(f);
         return YES;
@@ -184,8 +205,10 @@ enum {
 
     if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"cydia://package/com.example.package"]])
     {
+
         return YES;
     }
+
 
     //Symbolic link verification
     struct stat s;
@@ -210,6 +233,16 @@ enum {
         [[NSFileManager defaultManager] removeItemAtPath:@"/private/test_jb.txt" error:nil];
         return YES;
     }
+
+
+
+
+
+
+
+
+
+
 
     //New Plugin
     // Make an int to monitor how many checks are failed
@@ -269,11 +302,47 @@ enum {
         motzart += 2;
     }
 
+    if ([self checkURLSchemes] != NOTJAIL) {
+        // Jailbroken
+        motzart += 3;
+    }
+
+    if ([self checkExistenceOfSuspiciousFiles] != NOTJAIL) {
+        // Jailbroken
+        motzart += 3;
+    }
+
+    if ([self checkSuspiciousFilesCanBeOpened] != NOTJAIL) {
+        // Jailbroken
+        motzart += 3;
+    }
+
+    if ([self checkRestrictedDirectoriesWriteable] != NOTJAIL) {
+        // Jailbroken
+        motzart += 3;
+    }
+
+    if ([self checkSymbolicLinks] != NOTJAIL) {
+        // Jailbroken
+        motzart += 3;
+    }
+
+    if ([self checkDYLD] != NOTJAIL) {
+        // Jailbroken
+        motzart += 3;
+    }
+
+    if ([self checkFork] != NOTJAIL) {
+        // Jailbroken
+        motzart += 3;
+    }
+
     // Check if the Jailbreak Integer is 3 or more
     if (motzart >= 3) {
         // Jailbroken
         return YES;
     }
+
 
 #endif
 
@@ -319,6 +388,7 @@ enum {
         return NOTJAIL;
     }
 }
+
 
 // Inaccessible Files Check
 - (int)inaccessibleFilesCheck {
@@ -546,9 +616,140 @@ enum {
             }
         }
     }
-
     // If no processes are found, return nothing
     return nil;
+}
+
+
+- (int)checkURLSchemes {
+    @try {
+       for (NSString *url_scheme in URLSCHEMES) {
+            if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:url_scheme]]){
+               // return KFNewCheckURL;
+            }
+        }
+        return NOTJAIL;
+    }
+    @catch (NSException *exception) {
+        // Not Jailbroken
+        return NOTJAIL;
+    }
+
+}
+
+- (int)checkExistenceOfSuspiciousFiles {
+    @try {
+        for (NSString *suspicious_file in EXISTSUSPICIOUSFILES) {
+            if ([[NSFileManager defaultManager] fileExistsAtPath:suspicious_file]){
+                return KFNewCheckESF;
+            }
+        }
+        return NOTJAIL;
+    }
+    @catch (NSException *exception) {
+        // Not Jailbroken
+        return NOTJAIL;
+    }
+}
+
+
+- (int)checkSuspiciousFilesCanBeOpened {
+    @try {
+        for (NSString *suspicious_file in OPENSUSPICIOUSFILES) {
+            FILE *f = NULL ;
+            // if ((f = fopen("/bin/bash", "r")) ||
+            const char *cString = [suspicious_file UTF8String];
+            if ((f = fopen(cString, "r")))  {
+                fclose(f);
+                return KFNewCheckSFCO;
+            }
+            fclose(f);
+        }
+        return NOTJAIL;
+    }
+    @catch (NSException *exception) {
+        // Not Jailbroken
+        return NOTJAIL;
+    }
+}
+
+- (int)checkRestrictedDirectoriesWriteable {
+    @try {
+        for (NSString *writable_dir in WRITEABLEDIRS) {
+            NSError *error;
+            NSString *testWriteText = @"Jailbreak test";
+            NSString *testWritePath = [writable_dir stringByAppendingString:@"jailbreaktest.txt"];
+            [testWriteText writeToFile:testWritePath atomically:YES encoding:NSUTF8StringEncoding error:&error];
+            if (error == nil){
+                [[NSFileManager defaultManager] removeItemAtPath:testWritePath error:nil];
+                return KFNewCheckRDW;
+            }else {
+                [[NSFileManager defaultManager] removeItemAtPath:testWritePath error:nil];
+            }
+        }
+        return NOTJAIL;
+    }
+    @catch (NSException *exception) {
+        // Not Jailbroken
+        return NOTJAIL;
+    }
+}
+
+- (int)checkSymbolicLinks {
+    @try {
+        struct stat s;
+        for (NSString *symlink_name in SYMLINKS) {
+             const char *cString = [symlink_name UTF8String];
+            if (lstat(cString, &s) != 0) {
+                if (s.st_mode & S_IFLNK) {
+                    // Device is jailbroken
+                    return KFNewCheckSL;
+                }
+            }
+        }
+        return NOTJAIL;
+    }
+    @catch (NSException *exception) {
+        // Not Jailbroken
+        return NOTJAIL;
+    }
+}
+
+- (int)checkDYLD {
+    @try {
+        int imageCount = _dyld_image_count();
+        for (int i=0; i < imageCount; i++) {
+            const char *dyld_image_name = _dyld_get_image_name(i);
+            for (NSString *dyld_check_name in DYLDS) {
+                NSString *s = [[NSString alloc] initWithBytes:dyld_image_name length:strlen(dyld_image_name) encoding:[NSString defaultCStringEncoding]];
+                if ([dyld_check_name compare:s] == NSOrderedSame) {
+                    return KFNewCheckDYLD;
+                }
+            }
+        }
+        return NOTJAIL;
+    }
+    @catch (NSException *exception) {
+        // Not Jailbroken
+        return NOTJAIL;
+    }
+}
+
+- (int)checkFork {
+    @try {
+        int pid = fork();
+        if (!pid){
+            exit(0);
+        }
+        if (pid >= 0) {
+            return KFNewCheckFork;
+        }
+        return NOTJAIL;
+    }
+    @catch (NSException *exception) {
+        // Not Jailbroken
+        return NOTJAIL;
+    }
 }
 
 @end
