@@ -30,6 +30,10 @@
         <header-file src="src/ios/IRoot.h"/>
 
         <source-file src="src/ios/IRoot.m"/>
+
+        <header-file src="src/ios/JB.h"/>
+
+        <source-file src="src/ios/JB.m"/>
     </platform>
 
     <platform name="android">
