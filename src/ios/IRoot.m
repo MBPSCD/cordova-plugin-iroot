@@ -70,7 +70,7 @@ enum {
     {
         BOOL jailbroken = [self jailbroken];
         BOOL isPassed = isSecurityCheckPassed(); 
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:jailbroken & !isPassed];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsBool:jailbroken || !isPassed];
     }
     @catch (NSException *exception)
     {
